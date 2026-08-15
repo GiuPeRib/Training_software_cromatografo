@@ -2,8 +2,8 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Software Cromatografo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulazione Software</title>
 
 <style>
         body, html {
@@ -16,7 +16,6 @@
             background-color: #000;
         }
 
-        /* Il contenitore occupa l'intero schermo */
         .container {
             position: relative;
             width: 100%;
@@ -28,28 +27,26 @@
             overflow: hidden;
         }
 
-        .screen-container {
+        /* Wrapper che si adatta allo schermo lasciando spazio alla barra in basso */
+        .screen-wrapper {
             position: relative;
             display: inline-block;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            max-width: 100%;
+            max-height: calc(100vh - 55px);
         }
 
-        /* L'immagine ora si estende al 100% dello schermo */
-        .screen-container img {
+        .screen-wrapper img {
             display: block;
             max-width: 100vw;
-            max-height: 100vh;
+            max-height: calc(100vh - 55px);
             width: auto;
             height: auto;
-            object-fit: contain; /* Mantiene le proporzioni senza deformare */
-            cursor: pointer;
+            object-fit: contain;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        /* Layer degli hotspot perfettamente in sincronia con l'immagine */
+        /* Layer degli hotspot perfettamente in sincronia con le dimensioni reali dell'immagine */
         #hotspot-layer {
             position: absolute;
             top: 0;
@@ -61,7 +58,7 @@
 
         .hotspot {
             position: absolute;
-            border: 2px dashed rgba(255, 0, 0, 0); /* Lascialo 0.5 per i test */
+            border: 2px dashed rgba(255, 0, 0, 0); /* Metti 0.5 se vuoi vederli per i test */
             cursor: pointer;
             pointer-events: auto;
         }
@@ -73,8 +70,8 @@
             left: 0;
             height: 55px;
             width: 100%;
-            background-color: rgba(0, 123, 255, 0.95); /* Azzurro vivido con leggera trasparenza */
-            backdrop-filter: blur(5px); /* Leggero effetto sfocato sotto (opzionale ma bellissimo) */
+            background-color: rgba(0, 123, 255, 0.95);
+            backdrop-filter: blur(5px);
             border-top: 1px solid rgba(255, 255, 255, 0.3);
             display: flex;
             align-items: center;
@@ -86,7 +83,7 @@
         }
 
         #bottom-bar .instruction-text {
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: bold;
             color: #f1f1f1;
             white-space: nowrap;
@@ -111,7 +108,7 @@
             border-radius: 8px;
             font-weight: bold;
             font-size: 1.5em;
-            z-index: 200;
+            z-index: 400;
             display: none;      
             pointer-events: none;
             white-space: nowrap; 
@@ -120,7 +117,7 @@
         #message.error { background: rgba(217, 83, 79, 0.95); color: white; }
         #message.success { background: rgba(92, 184, 92, 0.95); color: white; }
 
-/* --- SCHERMATA DI AVVISO INIZIALE --- */
+        /* --- SCHERMATA DI AVVISO INIZIALE --- */
         #start-overlay {
             position: fixed;
             top: 0;
@@ -155,26 +152,27 @@
             background-color: #0056b3;
         }
     </style>
-
 </head>
 <body>
 
 <div id="start-overlay">
-        <h2>Simulazione Software Interattiva</h2>
-        <p>Clicca sul pulsante sottostante per avviare la simulazione a schermo intero.</p>
-        <button id="start-btn" onclick="startSimulation()">Avvia a Schermo Intero 🚀</button>
-    </div>
+    <h2>Simulazione Software Interattiva</h2>
+    <p>Clicca sul pulsante sottostante per avviare la simulazione.</p>
+    <button id="start-btn" onclick="startSimulation()">Avvia Simulazione 🚀</button>
+</div>
 
-<div class="container">
-<!-- Immagine di sottofondo principale -->
-            <img id="software-screen" src="" alt="Screenshot Software" onclick="checkMissClick(event)">
-            
-            <!-- Seconda immagine sovrapposta per la transizione fluida -->
-            <img id="software-screen-next" src="" alt="" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;">
-            
-            <div id="hotspot-layer"></div>
-            <div id="message"></div>
+<div class="container" id="main-container">
+    <div class="screen-wrapper" id="screen-wrapper">
+        <!-- Immagine di sottofondo principale -->
+        <img id="software-screen" src="" alt="Screenshot Software" onclick="checkMissClick(event)">
+        
+        <!-- Seconda immagine sovrapposta per la transizione fluida -->
+        <img id="software-screen-next" src="" alt="" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;">
+        
+        <div id="hotspot-layer"></div>
     </div>
+    
+    <div id="message"></div>
 
     <!-- Barra in basso sovrapposta -->
     <div id="bottom-bar">
@@ -189,55 +187,46 @@
         {
             id: "Apertura programma",
             instruction: "Apri il programma",
-            image: "Desktop.png", // Nome del tuo file imma.2gine nella stessa cartella
-            // Coordinate della zona corretta in percentuale (left, top, width, height)
-           targetArea: { left: 31.5, top: 46, width: 4, height: 8 }
+            image: "Desktop.png",
+            targetArea: { left: 31.5, top: 46, width: 4, height: 8 }
         },
-
         {
             id: "Collegare lo strumento",
             instruction: "Cosa cliccheresti se lo strumento non fosse collegato al PC?",
             image: "Schermata iniziale.png",
             targetArea: { left: 32.3, top: 14.7, width: 1.3, height: 2.3 }
         },
-
         {
             id: "Cambio colonna",
             instruction: "Cosa cliccheresti per passare alla colonna degli anioni?",
             image: "Schermata iniziale.png",
             targetArea: { left: .1, top: 15.7, width: 4.5, height: 1.2 }
         },
-
         {
             id: "Priming 1",
             instruction: "Qual è la prima operazione da effettuare dopo aver acceso lo strumento? Clicca il pulsante corrispondente.",
             image: "Schermata iniziale.png",
             targetArea: { left: 22.8, top: 37, width: 2.7, height: 2 },
-
-            silentNextImage: "Priming - Open valve.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Priming - Open valve.png",
+            advanceImmediately: true
         },
-
   	    {
 	        id: "Priming_open_valve",
             instruction: "E adesso?",
             image: "Priming - Open valve.png",
             targetArea: { left: 97.2, top: 7, width: 2.3, height: 2.6 }
         },
-
         {
 	        id: "Ending_priming",
             instruction: "Come termini il priming della pompa?",
             image: "Priming - Stop.png",
             targetArea: { left: 22.8, top: 33.8, width: 2.1, height: 1.6 }
         },
-
         {
 	        id: "Verify_pump",
             instruction: "Come verifichi di aver chiuso bene la valvola della pompa a pistone?",
             image: "Schermata iniziale.png",
             targetArea: { left: 22.8, top: 31, width: 2.1, height: 1.6 },
-
             autoSequence: [
                 { image: "Pressure 1.png", delay: 1000 },
                 { image: "Pressure 2.png", delay: 1000 },
@@ -245,244 +234,176 @@
                 { image: "Pressure 4.png", delay: 1000 },
                 { image: "Pressure 5.png", delay: 1000 },
                 { image: "Pressure 6.png", delay: 1000 }
-        ]
+            ]
         },
-
         {
     	    id: "New_sequence_1",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 1.png",
             targetArea: { left: 4.2, top: 2.2, width: 2.1, height: 1.8 },
-
-            silentNextImage: "Nuova sequenza 2.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Nuova sequenza 2.png",
+            advanceImmediately: true
         },
-
         {
 	        id: "New_sequence_2",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 2.png",
             targetArea: { left: 4.2, top: 6.4, width: 10.8, height: 1.8 },
-
-            silentNextImage: "Nuova sequenza 3.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Nuova sequenza 3.png",
+            advanceImmediately: true
         },
-
         {
 	        id: "New_sequence_3",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 3.png",
             targetArea: { left: 14.1, top: 25.3, width: 5, height: 1.6 },
-
-            silentNextImage: "Nuova sequenza 4.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Nuova sequenza 4.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "New_sequence_4",
+	        id: "New_sequence_4",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 4.png",
             targetArea: { left: 84.3, top: 49.8, width: 3.8, height: 1.6 },
-
-            silentNextImage: "Nuova sequenza 5.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Nuova sequenza 5.png",
+            advanceImmediately: true
         },
-
         {
 	        id: "New_sequence_5",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 5.png",
             targetArea: { left: 84.3, top: 49.8, width: 3.8, height: 1.6 },
-
-            silentNextImage: "Nuova sequenza 6.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Nuova sequenza 6.png",
+            advanceImmediately: true
         },
-
         {
 	        id: "New_sequence_6",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 6.png",
             targetArea: { left: 84.3, top: 49.8, width: 3.8, height: 1.6 },
-
-            silentNextImage: "Nuova sequenza 7.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Nuova sequenza 7.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "New_sequence_7",
+	        id: "New_sequence_7",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 7.png",
             targetArea: { left: 84.2, top: 49.8, width: 3.75, height: 1.6 },
-
-            silentNextImage: "Nuova sequenza 8.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Nuova sequenza 8.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "New_sequence_8",
+	        id: "New_sequence_8",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 8.png",
             targetArea: { left: 56.9, top: 66.5, width: 3.7, height: 1.6 },
-
             autoSequence: [
-                { image: "Nuova sequenza 9.png", delay: 2000 },
-        ]
+                { image: "Nuova sequenza 9.png", delay: 2000 }
+            ]
         },
-
         {
-	    id: "Azzeramento",
+	        id: "Azzeramento",
             instruction: "La sequenza è pronta per l'analisi. Innanzitutto, imposta a zero il valore di conducibilità di fondo",
             image: "Azzeramento.png",
             targetArea: { left: 22.8, top: 25, width: 2.7, height: 1.6 },
-
             autoSequence: [
-            { image: "Azzeramento 2.png", delay: 2000 }
-        ]
+                { image: "Azzeramento 2.png", delay: 2000 }
+            ]
         },
-
         {
-	    id: "Linea di base",
+	        id: "Linea di base",
             instruction: "Proviamo a monitorare la linea di base. Come si fa?",
             image: "Azzeramento 2.png",
             targetArea: { left: 33.4, top: 4.8, width: 1.3, height: 1.7 },
-
-            silentNextImage: "Linea di base 2.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Linea di base 2.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "Linea di base 2",
+	        id: "Linea di base 2",
             instruction: "Prova a monitorare la linea di base. Come si fa?",
             image: "Linea di base 2.png",
             targetArea: { left: 51.8, top: 58.1, width: 3.6, height: 1.7 },
-
             autoSequence: [
-            { image: "Linea di base 3.png", delay: 800 },
-            { image: "Linea di base 4.png", delay: 800 },
-            { image: "Linea di base 5.png", delay: 800 },
-            { image: "Linea di base 6.png", delay: 800 }
-        ]
+                { image: "Linea di base 3.png", delay: 800 },
+                { image: "Linea di base 4.png", delay: 800 },
+                { image: "Linea di base 5.png", delay: 800 },
+                { image: "Linea di base 6.png", delay: 800 }
+            ]
         },
-
         {
-	    id: "Inizio analisi 1",
+	        id: "Inizio analisi 1",
             instruction: "La linea di base è buona, fai partire l'analisi.",
             image: "Inizio analisi 1.png",
             targetArea: { left: 26.3, top: 7.4, width: 5, height: 1.9 },
-
-            silentNextImage: "Inizio analisi 2.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Inizio analisi 2.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "Inizio analisi 2",
+	        id: "Inizio analisi 2",
             instruction: "La linea di base è buona, fai partire l'analisi.",
             image: "Inizio analisi 2.png",
             targetArea: { left: 42.3, top: 49.8, width: 7.4, height: 1.9 },
-
-            silentNextImage: "Inizio analisi 3.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Inizio analisi 3.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "Inizio analisi 3",
+	        id: "Inizio analisi 3",
             instruction: "La linea di base è buona, fai partire l'analisi.",
             image: "Inizio analisi 3.png",
             targetArea: { left: 49.3, top: 61.8, width: 5.3, height: 1.7 },
-
-            silentNextImage: "Inizio analisi 4.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Inizio analisi 4.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "Inizio analisi 4",
+	        id: "Inizio analisi 4",
             instruction: "Sembrerebbe che l'analisi sia partita, ma io non credo. Prova a controllare il pannello dello strumento.",
             image: "Inizio analisi 4.png",
             targetArea: { left: 0, top: 81.9, width: 18, height: 2.6 },
-
-            silentNextImage: "Inizio analisi 5.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Inizio analisi 5.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "Inizio analisi 5",
+	        id: "Inizio analisi 5",
             instruction: "Cosa devi fare qui?",
             image: "Inizio analisi 5.png",
             targetArea: { left: 97.2, top: 7, width: 2.3, height: 2.6 },
-
             autoSequence: [
-            { image: "Inizio analisi 6.png", delay: 800 },
-            { image: "Inizio analisi 7.png", delay: 800 },
-            { image: "Inizio analisi 8.png", delay: 800 },
-            { image: "Inizio analisi 9.png", delay: 800 }
-        ]
+                { image: "Inizio analisi 6.png", delay: 800 },
+                { image: "Inizio analisi 7.png", delay: 800 },
+                { image: "Inizio analisi 8.png", delay: 800 },
+                { image: "Inizio analisi 9.png", delay: 800 }
+            ]
         },
-
         {
-	    id: "Visualizzare il cromatogramma 1",
+	        id: "Visualizzare il cromatogramma 1",
             instruction: "L'analisi è terminata. Da dove apri il cromatogramma?",
             image: "Cromatogramma 1.png",
             targetArea: { left: 0, top: 84.7, width: 18, height: 2.6 },
-
-            silentNextImage: "Cromatogramma 2.png", // Metti qui il nome della nuova immagine
-            advanceImmediately: true // Passa subito allo step successivo senza messaggi
+            silentNextImage: "Cromatogramma 2.png",
+            advanceImmediately: true
         },
-
         {
-	    id: "Visualizzare il cromatogramma 1",
-            instruction: "L'analisi è terminata. Da dove apri il cromatogramma?",
-            image: "Cromatogramma 2.png",
-            targetArea: { left: 19.5, top: 24.5, width: 5.1, height: 2.6 },
-
-            autoSequence: [
-            { image: "Cromatogramma 3.png", delay: 5000 },
-            ]
-        },
-
+	        id: "Visualizzare il cromatogramma 2",
+            instruction: "Simulazione completata con successo! Clicca ovunque per uscire.",
+            image: "Cromatogramma 3.png" // Ultima immagine fissa della sequenza
+        }
     ];
 
     let currentStep = 0;
+    let simulationFinished = false;
 
-function preloadImages() {
+    function preloadImages() {
         steps.forEach(step => {
-            if (step.image) {
-                const img = new Image();
-                img.src = step.image;
-            }
-           if (step.silentNextImage) {
-                    // Creiamo un oggetto immagine in memoria invisibile
-                    const tempImg = new Image();
-                    tempImg.src = step.silentNextImage;
-                    
-                    // Appena l'immagine è pronta in memoria, la cambiamo di colpo
-                    tempImg.onload = function() {
-                        imgEl.src = step.silentNextImage;
-                        hotspotLayer.innerHTML = ""; // Rimuove l'hotspot
-
-                        if (step.advanceImmediately) {
-                            setTimeout(() => {
-                                currentStep++;
-                                loadStep();
-                            }, 200);
-                        }
-                    };
-                    return;
-                }
+            if (step.image) { new Image().src = step.image; }
+            if (step.silentNextImage) { new Image().src = step.silentNextImage; }
             if (step.autoSequence) {
-                step.autoSequence.forEach(seq => {
-                    const img = new Image();
-                    img.src = seq.image;
-                });
+                step.autoSequence.forEach(seq => { new Image().src = seq.image; });
             }
         });
     }
 
-function loadStep() {
-     
+    function loadStep() {
         const step = steps[currentStep];
-        const prevStep = steps[currentStep - 1];
-
-        // --- AGGIUNTA --- Resetta la seconda immagine al cambio step
         const nextImgEl = document.getElementById("software-screen-next");
         nextImgEl.style.display = "none";
         nextImgEl.src = "";
@@ -491,40 +412,24 @@ function loadStep() {
         const imgEl = document.getElementById("software-screen");
         const hotspotLayer = document.getElementById("hotspot-layer");
         const messageEl = document.getElementById("message");
-        const audio = document.getElementById('success-sound');
 
-        // PULIZIA: nascondiamo il messaggio al cambio step
         messageEl.style.display = "none"; 
         hotspotLayer.innerHTML = "";
 
-        // MODIFICA 1: Spegniamo l'audio SOLO se NON stiamo passando 
-        // da "Priming_open_valve" a "Ending_priming"     
-        const isTransitioningPriming = prevStep && prevStep.id === "Priming_open_valve" && step.id === "Ending_priming";
-        
-        // --- AGGIUNTA --- Se siamo già oltre "Verify_pump", l'audio deve restare acceso
-        const isPastVerifyPump = prevStep && (prevStep.id === "Verify_pump" || prevStep.id.startsWith("New_sequence"));
-
-        if (!isTransitioningPriming && !isPastVerifyPump) {
-            audio.pause();
-            audio.currentTime = 0;
-            audio.onended = null;
-            audio.loop = false;
-        }
-        
-        if (currentStep >= steps.length - 1 && !step.image) {
-            instructionEl.textContent = step.instruction;
-            imgEl.style.display = "none";
-            return;
-        }
+        if (!step) return;
 
         instructionEl.textContent = step.instruction;
         imgEl.src = step.image;
         imgEl.style.display = "block";
 
-        // MODIFICA 2: Se siamo atterrati su Ending_priming, assicuriamo che il loop continui
-        if (step.id === "Ending_priming") {
-            audio.loop = true;
-            audio.play().catch(e => console.log("Audio bloccato:", e));
+        // Se siamo arrivati all'ultimo step, abilitiamo la chiusura al tocco
+        if (currentStep === steps.length - 1) {
+            simulationFinished = true;
+            document.getElementById("screen-wrapper").style.cursor = "pointer";
+            document.getElementById("screen-wrapper").onclick = function() {
+                closeSimulation();
+            };
+            return;
         }
 
         if (step.targetArea) {
@@ -538,18 +443,11 @@ function loadStep() {
             hs.onclick = function(e) {
                 e.stopPropagation();
                 
-                // SE QUESTO STEP DEVE CAMBIARE IN SILENZIO SENZA MESSAGGI:
                 if (step.silentNextImage) {
-                    // 1. Assegniamo la nuova immagine al secondo tag sovrapposto
                     nextImgEl.src = step.silentNextImage;
-                    
-                    // 2. La rendiamo visibile all'istante (essendo già precaricata, apparirà sopra la prima senza sfarfalli)
                     nextImgEl.style.display = "block";
-                    
-                    // 3. Rimuoviamo l'hotspot attuale
                     hotspotLayer.innerHTML = "";
 
-                    // 4. Se deve avanzare subito di step
                     if (step.advanceImmediately) {
                         setTimeout(() => {
                             currentStep++;
@@ -561,69 +459,30 @@ function loadStep() {
 
                 messageEl.textContent = "Corretto! Avanzamento...";
                 messageEl.className = "success";
-                messageEl.style.display = "block"; // Mostra il messaggio
+                messageEl.style.display = "block";
 
-                // 1. GESTIONE AUDIO SUI PASSAGGI SPECIFICI
-                if (step.id === "Priming_open_valve") { 
-                    let loopCount = 0;
-                    audio.loop = true; 
-                    audio.play();
-                } 
-                else if (step.id === "Ending_priming") {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    audio.loop = false;
-                }
-                else if (step.id === "Verify_pump") {
-                    // Se vuoi che parta/continui l'audio anche qui:
-                    audio.addEventListener('timeupdate', function() {
-                     // Se mancano meno di 0.2 secondi alla fine, riavvia subito
-                    if (this.currentTime > (this.duration - 0.2)) {
-                    this.currentTime = 0;
-                    this.play();
-                    }
-});
-                    audio.play().catch(err => console.log("Audio bloccato:", err));
-                }
-
-                // 2. GESTIONE DELLA SEQUENZA AUTOMATICA (per Verify_pump o altri step simili)
                 if (step.autoSequence && step.autoSequence.length > 0) {
                     let seqIndex = 0;
-                    
                     function playNextImage() {
                         if (seqIndex < step.autoSequence.length) {
                             let nextStepData = step.autoSequence[seqIndex];
-                            
-                            // Cambia l'immagine con la successiva della sequenza
                             imgEl.src = nextStepData.image;
-                            
-                            // Attende il delay configurato e passa alla prossima
                             setTimeout(() => {
                                 seqIndex++;
                                 playNextImage();
                             }, nextStepData.delay);
-                            
                         } else {
-                            // Finiti i passaggi automatici, avanziamo di step ma LASCIAMO ACCESO L'AUDIO
                             messageEl.style.display = "none";
                             currentStep++;
                             loadStep();
                         }
                     }
-
-                    // Avvia la sequenza dopo un breve istante iniziale
-                    setTimeout(() => {
-                        playNextImage();
-                    }, 800);
-
+                    setTimeout(() => { playNextImage(); }, 800);
                 } else {
-                    // 3. COMPORTAMENTO STANDARD (per tutti gli altri step normali)
-                    let tempoAttesa = (step.id === "Priming_open_valve") ? 800 : 1500;
-
                     setTimeout(() => {
                         currentStep++;
                         loadStep();
-                    }, tempoAttesa);
+                    }, 1500);
                 }
             };
             hotspotLayer.appendChild(hs);
@@ -631,45 +490,37 @@ function loadStep() {
     }
 
     function checkMissClick(e) {
+        if (simulationFinished) return;
         const messageEl = document.getElementById("message");
         messageEl.textContent = "Riprova!";
         messageEl.className = "error";
-        messageEl.style.display = "block"; // Mostra il messaggio
+        messageEl.style.display = "block";
 
-        // Nascondi il messaggio dopo 1.5 secondi
         setTimeout(() => {
             messageEl.style.display = "none";
         }, 1500);
     }
 
-    // Avvia il primo step al caricamento della pagina
-	function startSimulation() {
-
-        // 1. Precarica tutte le immagini in silenzio
-        preloadImages();
-
-        // 2. Richiede al browser di andare in modalità Full Screen
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen().catch(err => {
-                console.log("Fullscreen non consentito dal browser:", err);
-            });
-        } else if (elem.webkitRequestFullscreen) { /* Safari */
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) { /* IE11 */
-            elem.msRequestFullscreen();
+    function closeSimulation() {
+        window.close();
+        if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
         }
-
-        // 3. Nasconde la schermata di benvenuto
-        document.getElementById("start-overlay").style.display = "none";
-
-        // 4. Avvia effettivamente il primo step della simulazione
-        loadStep();
+        document.getElementById("instruction").textContent = "Simulazione terminata. È possibile chiudere la scheda.";
     }
 
+    function startSimulation() {
+        preloadImages();
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(() => {});
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        }
+        document.getElementById("start-overlay").style.display = "none";
+        loadStep();
+    }
 </script>
-
-<audio id="success-sound" src="Rumore cromatografo.m4a"></audio>
 
 </body>
 </html>
