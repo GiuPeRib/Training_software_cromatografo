@@ -417,15 +417,6 @@
         imgEl.src = step.image;
         imgEl.style.display = "block";
 
-        // Gestione audio nei passaggi specifici
-        if (step.id === "Ending_priming") {
-            audio.loop = true;
-            audio.play().catch(e => console.log("Audio bloccato:", e));
-        } else if (step.id === "Verify_pump") {
-            audio.loop = true;
-            audio.play().catch(e => console.log("Audio bloccato:", e));
-        }
-
         if (currentStep === steps.length - 1) {
             simulationFinished = true;
             audio.pause(); // Spegne l'audio alla fine
@@ -465,7 +456,7 @@
                 messageEl.className = "success";
                 messageEl.style.display = "block";
 
-                // Gestione audio allo scatto del target di priming
+                // Gestione audio al click sui target specifici
                 if (step.id === "Priming_open_valve") { 
                     audio.loop = true; 
                     audio.play().catch(e => console.log("Audio bloccato:", e));
@@ -473,6 +464,9 @@
                     audio.pause();
                     audio.currentTime = 0;
                     audio.loop = false;
+                } else if (step.id === "Verify_pump") {
+                    audio.loop = true;
+                    audio.play().catch(e => console.log("Audio bloccato:", e));
                 }
 
                 if (step.autoSequence && step.autoSequence.length > 0) {
