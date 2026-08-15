@@ -376,8 +376,17 @@
             silentNextImage: "Cromatogramma 2.png",
             advanceImmediately: true
         },
-        {
+		{
 	        id: "Visualizzare il cromatogramma 2",
+            instruction: "L'analisi è terminata. Da dove apri il cromatogramma?",
+            image: "Cromatogramma 2.png",
+            targetArea: { left: 19.5, top: 24.5, width: 5.1, height: 2.6 },
+            autoSequence: [
+                { image: "Cromatogramma 3.png", delay: 2000 },
+            ]
+        },
+        {
+	        id: "Fine_simulazione",
             instruction: "Simulazione completata con successo! Clicca ovunque per uscire.",
             image: "Cromatogramma 3.png"
         }
