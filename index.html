@@ -27,7 +27,6 @@
             overflow: hidden;
         }
 
-        /* Wrapper che si adatta allo schermo lasciando spazio alla barra in basso */
         .screen-wrapper {
             position: relative;
             display: inline-block;
@@ -46,7 +45,6 @@
             -webkit-user-select: none;
         }
 
-        /* Layer degli hotspot perfettamente in sincronia con le dimensioni reali dell'immagine */
         #hotspot-layer {
             position: absolute;
             top: 0;
@@ -96,7 +94,7 @@
             font-size: 1.2em;
         }
 
-        /* --- MESSAGGIO CENTRALE (Corretto / Riprova) --- */
+        /* --- MESSAGGIO CENTRALE --- */
         #message {
             position: absolute; 
             top: 50%;           
@@ -163,26 +161,22 @@
 
 <div class="container" id="main-container">
     <div class="screen-wrapper" id="screen-wrapper">
-        <!-- Immagine di sottofondo principale -->
         <img id="software-screen" src="" alt="Screenshot Software" onclick="checkMissClick(event)">
-        
-        <!-- Seconda immagine sovrapposta per la transizione fluida -->
         <img id="software-screen-next" src="" alt="" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;">
-        
         <div id="hotspot-layer"></div>
     </div>
     
     <div id="message"></div>
 
-    <!-- Barra in basso sovrapposta -->
     <div id="bottom-bar">
         <div class="instruction-text" id="instruction">Caricamento simulazione...</div>
         <div class="status-icon">💡</div>
     </div>
 </div>
 
+<audio id="success-sound" src="Rumore cromatografo.m4a" preload="auto"></audio>
+
 <script>
-    // Configurazione dei passaggi della tua simulazione
     const steps = [
         {
             id: "Apertura programma",
@@ -385,7 +379,7 @@
         {
 	        id: "Visualizzare il cromatogramma 2",
             instruction: "Simulazione completata con successo! Clicca ovunque per uscire.",
-            image: "Cromatogramma 3.png" // Ultima immagine fissa della sequenza
+            image: "Cromatogramma 3.png"
         }
     ];
 
@@ -412,6 +406,7 @@
         const imgEl = document.getElementById("software-screen");
         const hotspotLayer = document.getElementById("hotspot-layer");
         const messageEl = document.getElementById("message");
+        const audio = document.getElementById('success-sound');
 
         messageEl.style.display = "none"; 
         hotspotLayer.innerHTML = "";
@@ -422,9 +417,18 @@
         imgEl.src = step.image;
         imgEl.style.display = "block";
 
-        // Se siamo arrivati all'ultimo step, abilitiamo la chiusura al tocco
+        // Gestione audio nei passaggi specifici
+        if (step.id === "Ending_priming") {
+            audio.loop = true;
+            audio.play().catch(e => console.log("Audio bloccato:", e));
+        } else if (step.id === "Verify_pump") {
+            audio.loop = true;
+            audio.play().catch(e => console.log("Audio bloccato:", e));
+        }
+
         if (currentStep === steps.length - 1) {
             simulationFinished = true;
+            audio.pause(); // Spegne l'audio alla fine
             document.getElementById("screen-wrapper").style.cursor = "pointer";
             document.getElementById("screen-wrapper").onclick = function() {
                 closeSimulation();
@@ -461,6 +465,16 @@
                 messageEl.className = "success";
                 messageEl.style.display = "block";
 
+                // Gestione audio allo scatto del target di priming
+                if (step.id === "Priming_open_valve") { 
+                    audio.loop = true; 
+                    audio.play().catch(e => console.log("Audio bloccato:", e));
+                } else if (step.id === "Ending_priming") {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.loop = false;
+                }
+
                 if (step.autoSequence && step.autoSequence.length > 0) {
                     let seqIndex = 0;
                     function playNextImage() {
@@ -479,10 +493,11 @@
                     }
                     setTimeout(() => { playNextImage(); }, 800);
                 } else {
+                    let tempoAttesa = (step.id === "Priming_open_valve") ? 800 : 1500;
                     setTimeout(() => {
                         currentStep++;
                         loadStep();
-                    }, 1500);
+                    }, tempoAttesa);
                 }
             };
             hotspotLayer.appendChild(hs);
