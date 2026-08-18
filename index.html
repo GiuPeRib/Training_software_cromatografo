@@ -97,8 +97,8 @@
         /* --- MESSAGGIO CENTRALE --- */
         #message {
             position: absolute; 
-            top: 50%;           
-            left: 50%;          
+            top: 50%;            
+            left: 50%<b></b>;          
             transform: translate(-50%, -50%); 
             background: rgba(0, 0, 0, 0.85);
             color: white;
@@ -133,16 +133,37 @@
             text-align: center;
             padding: 20px;
         }
+        #password-group {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        #password-input {
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 220px;
+            text-align: center;
+        }
+        #error-msg {
+            color: #ff6b6b;
+            font-size: 0.9em;
+            display: none;
+            margin-top: 5px;
+        }
         #start-btn {
             background-color: #007bff;
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 12px 25px;
             font-size: 1.2em;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 10px;
             box-shadow: 0 4px 15px rgba(0,123,255,0.4);
             transition: background 0.2s;
         }
@@ -155,8 +176,12 @@
 
 <div id="start-overlay">
     <h2>Simulazione Software Interattiva</h2>
-    <p>Clicca sul pulsante sottostante per avviare la simulazione.</p>
-    <button id="start-btn" onclick="startSimulation()">Avvia Simulazione 🚀</button>
+    <p>Inserisci la password per accedere alla simulazione.</p>
+    <div id="password-group">
+        <input type="password" id="password-input" placeholder="Password...">
+        <button id="start-btn" onclick="verifyPassword()">Avvia Simulazione 🚀</button>
+        <div id="error-msg">Password errata. Riprova.</div>
+    </div>
 </div>
 
 <div class="container" id="main-container">
@@ -177,6 +202,9 @@
 <audio id="success-sound" src="Rumore cromatografo.m4a" preload="auto"></audio>
 
 <script>
+    // MODIFICA QUI LA PASSWORD A PIACERE:
+    const ACCESS_PASSWORD = "Tswett@2026";
+
     const steps = [
         {
             id: "Apertura programma",
@@ -204,20 +232,20 @@
             silentNextImage: "Priming - Open valve.png",
             advanceImmediately: true
         },
-  	    {
-	        id: "Priming_open_valve",
+        {
+            id: "Priming_open_valve",
             instruction: "E adesso?",
             image: "Priming - Open valve.png",
             targetArea: { left: 97.2, top: 7, width: 2.3, height: 2.6 }
         },
         {
-	        id: "Ending_priming",
+            id: "Ending_priming",
             instruction: "Come termini il priming della pompa?",
             image: "Priming - Stop.png",
             targetArea: { left: 22.8, top: 33.8, width: 2.1, height: 1.6 }
         },
         {
-	        id: "Verify_pump",
+            id: "Verify_pump",
             instruction: "Come verifichi di aver chiuso bene la valvola della pompa a pistone?",
             image: "Schermata iniziale.png",
             targetArea: { left: 22.8, top: 31, width: 2.1, height: 1.6 },
@@ -231,7 +259,7 @@
             ]
         },
         {
-    	    id: "New_sequence_1",
+            id: "New_sequence_1",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 1.png",
             targetArea: { left: 4.2, top: 2.2, width: 2.1, height: 1.8 },
@@ -239,7 +267,7 @@
             advanceImmediately: true
         },
         {
-	        id: "New_sequence_2",
+            id: "New_sequence_2",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 2.png",
             targetArea: { left: 4.2, top: 6.4, width: 10.8, height: 1.8 },
@@ -247,7 +275,7 @@
             advanceImmediately: true
         },
         {
-	        id: "New_sequence_3",
+            id: "New_sequence_3",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 3.png",
             targetArea: { left: 14.1, top: 25.3, width: 5, height: 1.6 },
@@ -255,7 +283,7 @@
             advanceImmediately: true
         },
         {
-	        id: "New_sequence_4",
+            id: "New_sequence_4",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 4.png",
             targetArea: { left: 84.3, top: 49.8, width: 3.8, height: 1.6 },
@@ -263,7 +291,7 @@
             advanceImmediately: true
         },
         {
-	        id: "New_sequence_5",
+            id: "New_sequence_5",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 5.png",
             targetArea: { left: 84.3, top: 49.8, width: 3.8, height: 1.6 },
@@ -271,7 +299,7 @@
             advanceImmediately: true
         },
         {
-	        id: "New_sequence_6",
+            id: "New_sequence_6",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 6.png",
             targetArea: { left: 84.3, top: 49.8, width: 3.8, height: 1.6 },
@@ -279,7 +307,7 @@
             advanceImmediately: true
         },
         {
-	        id: "New_sequence_7",
+            id: "New_sequence_7",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 7.png",
             targetArea: { left: 84.2, top: 49.8, width: 3.75, height: 1.6 },
@@ -287,7 +315,7 @@
             advanceImmediately: true
         },
         {
-	        id: "New_sequence_8",
+            id: "New_sequence_8",
             instruction: "Mentre il sistema continua a equilibrarsi, crea una nuova sequenza di analisi dei cationi",
             image: "Nuova sequenza 8.png",
             targetArea: { left: 56.9, top: 66.5, width: 3.7, height: 1.6 },
@@ -296,7 +324,7 @@
             ]
         },
         {
-	        id: "Azzeramento",
+            id: "Azzeramento",
             instruction: "La sequenza è pronta per l'analisi. Innanzitutto, imposta a zero il valore di conducibilità di fondo",
             image: "Azzeramento.png",
             targetArea: { left: 22.8, top: 25, width: 2.7, height: 1.6 },
@@ -305,7 +333,7 @@
             ]
         },
         {
-	        id: "Linea di base",
+            id: "Linea di base",
             instruction: "Proviamo a monitorare la linea di base. Come si fa?",
             image: "Azzeramento 2.png",
             targetArea: { left: 33.4, top: 4.8, width: 1.3, height: 1.7 },
@@ -313,7 +341,7 @@
             advanceImmediately: true
         },
         {
-	        id: "Linea di base 2",
+            id: "Linea di base 2",
             instruction: "Prova a monitorare la linea di base. Come si fa?",
             image: "Linea di base 2.png",
             targetArea: { left: 51.8, top: 58.1, width: 3.6, height: 1.7 },
@@ -325,7 +353,7 @@
             ]
         },
         {
-	        id: "Inizio analisi 1",
+            id: "Inizio analisi 1",
             instruction: "La linea di base è buona, fai partire l'analisi.",
             image: "Inizio analisi 1.png",
             targetArea: { left: 26.3, top: 7.4, width: 5, height: 1.9 },
@@ -333,7 +361,7 @@
             advanceImmediately: true
         },
         {
-	        id: "Inizio analisi 2",
+            id: "Inizio analisi 2",
             instruction: "La linea di base è buona, fai partire l'analisi.",
             image: "Inizio analisi 2.png",
             targetArea: { left: 42.3, top: 49.8, width: 7.4, height: 1.9 },
@@ -341,7 +369,7 @@
             advanceImmediately: true
         },
         {
-	        id: "Inizio analisi 3",
+            id: "Inizio analisi 3",
             instruction: "La linea di base è buona, fai partire l'analisi.",
             image: "Inizio analisi 3.png",
             targetArea: { left: 49.3, top: 61.8, width: 5.3, height: 1.7 },
@@ -349,7 +377,7 @@
             advanceImmediately: true
         },
         {
-	        id: "Inizio analisi 4",
+            id: "Inizio analisi 4",
             instruction: "Sembrerebbe che l'analisi sia partita, ma io non credo. Prova a controllare il pannello dello strumento.",
             image: "Inizio analisi 4.png",
             targetArea: { left: 0, top: 81.9, width: 18, height: 2.6 },
@@ -357,7 +385,7 @@
             advanceImmediately: true
         },
         {
-	        id: "Inizio analisi 5",
+            id: "Inizio analisi 5",
             instruction: "Cosa devi fare qui?",
             image: "Inizio analisi 5.png",
             targetArea: { left: 97.2, top: 7, width: 2.3, height: 2.6 },
@@ -369,15 +397,15 @@
             ]
         },
         {
-	        id: "Visualizzare il cromatogramma 1",
+            id: "Visualizzare il cromatogramma 1",
             instruction: "L'analisi è terminata. Da dove apri il cromatogramma?",
             image: "Cromatogramma 1.png",
             targetArea: { left: 0, top: 84.7, width: 18, height: 2.6 },
             silentNextImage: "Cromatogramma 2.png",
             advanceImmediately: true
         },
-		{
-	        id: "Visualizzare il cromatogramma 2",
+        {
+            id: "Visualizzare il cromatogramma 2",
             instruction: "L'analisi è terminata. Da dove apri il cromatogramma?",
             image: "Cromatogramma 2.png",
             targetArea: { left: 19.5, top: 24.5, width: 5.1, height: 2.6 },
@@ -386,7 +414,7 @@
             ]
         },
         {
-	        id: "Fine_simulazione",
+            id: "Fine_simulazione",
             instruction: "Simulazione completata con successo! Clicca ovunque per uscire.",
             image: "Cromatogramma 3.png"
         }
@@ -403,6 +431,18 @@
                 step.autoSequence.forEach(seq => { new Image().src = seq.image; });
             }
         });
+    }
+
+    function verifyPassword() {
+        const inputVal = document.getElementById("password-input").value;
+        const errorMsg = document.getElementById("error-msg");
+
+        if (inputVal === ACCESS_PASSWORD) {
+            startSimulation();
+        } else {
+            errorMsg.style.display = "block";
+            document.getElementById("password-input").value = "";
+        }
     }
 
     function loadStep() {
@@ -428,7 +468,7 @@
 
         if (currentStep === steps.length - 1) {
             simulationFinished = true;
-            audio.pause(); // Spegne l'audio alla fine
+            audio.pause(); 
             document.getElementById("screen-wrapper").style.cursor = "pointer";
             document.getElementById("screen-wrapper").onclick = function() {
                 closeSimulation();
@@ -465,7 +505,6 @@
                 messageEl.className = "success";
                 messageEl.style.display = "block";
 
-                // Gestione audio al click sui target specifici
                 if (step.id === "Priming_open_valve") { 
                     audio.loop = true; 
                     audio.play().catch(e => console.log("Audio bloccato:", e));
